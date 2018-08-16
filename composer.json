@@ -1,0 +1,46 @@
+{
+  "name": "swoole/etcd-client",
+  "type": "library",
+  "keywords": [
+    "php",
+    "swoole",
+    "http",
+    "http2",
+    "client",
+    "coroutine"
+  ],
+  "description": "Etcd-v3 PHP Client base on Swoole Http2 Coroutine",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "twosee",
+      "email": "twose@qq.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/swoole/etcd-client/issues"
+  },
+  "require": {
+    "php": ">=7.0",
+    "google/protobuf": "^3"
+  },
+  "autoload": {
+    "classmap": [
+      "src/Grpc",
+      "src/Etcd"
+    ],
+    "files": [
+      "src/include/functions.php"
+    ]
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.laravel-china.org/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  }
+}

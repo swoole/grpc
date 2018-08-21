@@ -21,7 +21,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthEnableRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthEnableResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthEnableResponse[]|\Grpc\StringifyAble[]
      */
     public function AuthEnable(\Etcdserverpb\AuthEnableRequest $argument,
       $metadata = [], $options = []) {
@@ -36,7 +36,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthDisableRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthDisableResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthDisableResponse[]|\Grpc\StringifyAble[]
      */
     public function AuthDisable(\Etcdserverpb\AuthDisableRequest $argument,
       $metadata = [], $options = []) {
@@ -51,7 +51,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthenticateRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthenticateResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthenticateResponse[]|\Grpc\StringifyAble[]
      */
     public function Authenticate(\Etcdserverpb\AuthenticateRequest $argument,
       $metadata = [], $options = []) {
@@ -66,7 +66,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserAddRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserAddResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserAddResponse[]|\Grpc\StringifyAble[]
      */
     public function UserAdd(\Etcdserverpb\AuthUserAddRequest $argument,
       $metadata = [], $options = []) {
@@ -81,7 +81,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserGetRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserGetResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserGetResponse[]|\Grpc\StringifyAble[]
      */
     public function UserGet(\Etcdserverpb\AuthUserGetRequest $argument,
       $metadata = [], $options = []) {
@@ -96,7 +96,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserListRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserListResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserListResponse[]|\Grpc\StringifyAble[]
      */
     public function UserList(\Etcdserverpb\AuthUserListRequest $argument,
       $metadata = [], $options = []) {
@@ -111,7 +111,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserDeleteRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserDeleteResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserDeleteResponse[]|\Grpc\StringifyAble[]
      */
     public function UserDelete(\Etcdserverpb\AuthUserDeleteRequest $argument,
       $metadata = [], $options = []) {
@@ -126,7 +126,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserChangePasswordRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserChangePasswordResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserChangePasswordResponse[]|\Grpc\StringifyAble[]
      */
     public function UserChangePassword(\Etcdserverpb\AuthUserChangePasswordRequest $argument,
       $metadata = [], $options = []) {
@@ -141,7 +141,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserGrantRoleRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserGrantRoleResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserGrantRoleResponse[]|\Grpc\StringifyAble[]
      */
     public function UserGrantRole(\Etcdserverpb\AuthUserGrantRoleRequest $argument,
       $metadata = [], $options = []) {
@@ -156,7 +156,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthUserRevokeRoleRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthUserRevokeRoleResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthUserRevokeRoleResponse[]|\Grpc\StringifyAble[]
      */
     public function UserRevokeRole(\Etcdserverpb\AuthUserRevokeRoleRequest $argument,
       $metadata = [], $options = []) {
@@ -171,7 +171,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthRoleAddRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthRoleAddResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthRoleAddResponse[]|\Grpc\StringifyAble[]
      */
     public function RoleAdd(\Etcdserverpb\AuthRoleAddRequest $argument,
       $metadata = [], $options = []) {
@@ -186,7 +186,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthRoleGetRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthRoleGetResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthRoleGetResponse[]|\Grpc\StringifyAble[]
      */
     public function RoleGet(\Etcdserverpb\AuthRoleGetRequest $argument,
       $metadata = [], $options = []) {
@@ -201,7 +201,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthRoleListRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthRoleListResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthRoleListResponse[]|\Grpc\StringifyAble[]
      */
     public function RoleList(\Etcdserverpb\AuthRoleListRequest $argument,
       $metadata = [], $options = []) {
@@ -216,7 +216,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthRoleDeleteRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthRoleDeleteResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthRoleDeleteResponse[]|\Grpc\StringifyAble[]
      */
     public function RoleDelete(\Etcdserverpb\AuthRoleDeleteRequest $argument,
       $metadata = [], $options = []) {
@@ -231,7 +231,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthRoleGrantPermissionRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthRoleGrantPermissionResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthRoleGrantPermissionResponse[]|\Grpc\StringifyAble[]
      */
     public function RoleGrantPermission(\Etcdserverpb\AuthRoleGrantPermissionRequest $argument,
       $metadata = [], $options = []) {
@@ -246,7 +246,7 @@ class AuthClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AuthRoleRevokePermissionRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AuthRoleRevokePermissionResponse[]|\Exception[]
+     * @return \Etcdserverpb\AuthRoleRevokePermissionResponse[]|\Grpc\StringifyAble[]
      */
     public function RoleRevokePermission(\Etcdserverpb\AuthRoleRevokePermissionRequest $argument,
       $metadata = [], $options = []) {

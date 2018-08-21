@@ -61,7 +61,7 @@ function generateClient(string $proto_dir)
                 function (array $match) {
                     switch ($match[4]) {
                         case '_simpleRequest':
-                            return "{$match[1]}\n{$match[3]}* @return {$match[5]}[]|\\Exception[]{$match[2]}";
+                            return "{$match[1]}\n{$match[3]}* @return {$match[5]}[]|\\Grpc\\StringifyAble[]{$match[2]}";
                         case '_bidiRequest':
                             return "{$match[1]}\n{$match[3]}* @return bool|\\Grpc\\BidiStreamingCall{$match[2]}";
                         case '_serverStreamRequest':

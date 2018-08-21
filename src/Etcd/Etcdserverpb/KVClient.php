@@ -21,7 +21,7 @@ class KVClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\RangeRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\RangeResponse[]|\Exception[]
+     * @return \Etcdserverpb\RangeResponse[]|\Grpc\StringifyAble[]
      */
     public function Range(\Etcdserverpb\RangeRequest $argument,
       $metadata = [], $options = []) {
@@ -38,7 +38,7 @@ class KVClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\PutRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\PutResponse[]|\Exception[]
+     * @return \Etcdserverpb\PutResponse[]|\Grpc\StringifyAble[]
      */
     public function Put(\Etcdserverpb\PutRequest $argument,
       $metadata = [], $options = []) {
@@ -55,7 +55,7 @@ class KVClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\DeleteRangeRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\DeleteRangeResponse[]|\Exception[]
+     * @return \Etcdserverpb\DeleteRangeResponse[]|\Grpc\StringifyAble[]
      */
     public function DeleteRange(\Etcdserverpb\DeleteRangeRequest $argument,
       $metadata = [], $options = []) {
@@ -73,7 +73,7 @@ class KVClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\TxnRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\TxnResponse[]|\Exception[]
+     * @return \Etcdserverpb\TxnResponse[]|\Grpc\StringifyAble[]
      */
     public function Txn(\Etcdserverpb\TxnRequest $argument,
       $metadata = [], $options = []) {
@@ -90,7 +90,7 @@ class KVClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\CompactionRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\CompactionResponse[]|\Exception[]
+     * @return \Etcdserverpb\CompactionResponse[]|\Grpc\StringifyAble[]
      */
     public function Compact(\Etcdserverpb\CompactionRequest $argument,
       $metadata = [], $options = []) {

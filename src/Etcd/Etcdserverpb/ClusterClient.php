@@ -21,7 +21,7 @@ class ClusterClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\MemberAddRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\MemberAddResponse[]|\Exception[]
+     * @return \Etcdserverpb\MemberAddResponse[]|\Grpc\StringifyAble[]
      */
     public function MemberAdd(\Etcdserverpb\MemberAddRequest $argument,
       $metadata = [], $options = []) {
@@ -36,7 +36,7 @@ class ClusterClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\MemberRemoveRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\MemberRemoveResponse[]|\Exception[]
+     * @return \Etcdserverpb\MemberRemoveResponse[]|\Grpc\StringifyAble[]
      */
     public function MemberRemove(\Etcdserverpb\MemberRemoveRequest $argument,
       $metadata = [], $options = []) {
@@ -51,7 +51,7 @@ class ClusterClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\MemberUpdateRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\MemberUpdateResponse[]|\Exception[]
+     * @return \Etcdserverpb\MemberUpdateResponse[]|\Grpc\StringifyAble[]
      */
     public function MemberUpdate(\Etcdserverpb\MemberUpdateRequest $argument,
       $metadata = [], $options = []) {
@@ -66,7 +66,7 @@ class ClusterClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\MemberListRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\MemberListResponse[]|\Exception[]
+     * @return \Etcdserverpb\MemberListResponse[]|\Grpc\StringifyAble[]
      */
     public function MemberList(\Etcdserverpb\MemberListRequest $argument,
       $metadata = [], $options = []) {

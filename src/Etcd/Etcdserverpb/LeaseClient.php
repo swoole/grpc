@@ -23,7 +23,7 @@ class LeaseClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\LeaseGrantRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\LeaseGrantResponse[]|\Exception[]
+     * @return \Etcdserverpb\LeaseGrantResponse[]|\Grpc\StringifyAble[]
      */
     public function LeaseGrant(\Etcdserverpb\LeaseGrantRequest $argument,
       $metadata = [], $options = []) {
@@ -38,7 +38,7 @@ class LeaseClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\LeaseRevokeRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\LeaseRevokeResponse[]|\Exception[]
+     * @return \Etcdserverpb\LeaseRevokeResponse[]|\Grpc\StringifyAble[]
      */
     public function LeaseRevoke(\Etcdserverpb\LeaseRevokeRequest $argument,
       $metadata = [], $options = []) {
@@ -66,7 +66,7 @@ class LeaseClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\LeaseTimeToLiveRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\LeaseTimeToLiveResponse[]|\Exception[]
+     * @return \Etcdserverpb\LeaseTimeToLiveResponse[]|\Grpc\StringifyAble[]
      */
     public function LeaseTimeToLive(\Etcdserverpb\LeaseTimeToLiveRequest $argument,
       $metadata = [], $options = []) {
@@ -81,7 +81,7 @@ class LeaseClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\LeaseLeasesRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\LeaseLeasesResponse[]|\Exception[]
+     * @return \Etcdserverpb\LeaseLeasesResponse[]|\Grpc\StringifyAble[]
      */
     public function LeaseLeases(\Etcdserverpb\LeaseLeasesRequest $argument,
       $metadata = [], $options = []) {

@@ -21,7 +21,7 @@ class MaintenanceClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\AlarmRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\AlarmResponse[]|\Exception[]
+     * @return \Etcdserverpb\AlarmResponse[]|\Grpc\StringifyAble[]
      */
     public function Alarm(\Etcdserverpb\AlarmRequest $argument,
       $metadata = [], $options = []) {
@@ -36,7 +36,7 @@ class MaintenanceClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\StatusRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\StatusResponse[]|\Exception[]
+     * @return \Etcdserverpb\StatusResponse[]|\Grpc\StringifyAble[]
      */
     public function Status(\Etcdserverpb\StatusRequest $argument,
       $metadata = [], $options = []) {
@@ -51,7 +51,7 @@ class MaintenanceClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\DefragmentRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\DefragmentResponse[]|\Exception[]
+     * @return \Etcdserverpb\DefragmentResponse[]|\Grpc\StringifyAble[]
      */
     public function Defragment(\Etcdserverpb\DefragmentRequest $argument,
       $metadata = [], $options = []) {
@@ -71,7 +71,7 @@ class MaintenanceClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\HashRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\HashResponse[]|\Exception[]
+     * @return \Etcdserverpb\HashResponse[]|\Grpc\StringifyAble[]
      */
     public function Hash(\Etcdserverpb\HashRequest $argument,
       $metadata = [], $options = []) {
@@ -87,7 +87,7 @@ class MaintenanceClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\HashKVRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\HashKVResponse[]|\Exception[]
+     * @return \Etcdserverpb\HashKVResponse[]|\Grpc\StringifyAble[]
      */
     public function HashKV(\Etcdserverpb\HashKVRequest $argument,
       $metadata = [], $options = []) {
@@ -116,7 +116,7 @@ class MaintenanceClient extends \Grpc\BaseStub {
      * @param \Etcdserverpb\MoveLeaderRequest $argument input argument
      * @param array $metadata metadata
      * @param array $options call options
-     * @return \Etcdserverpb\MoveLeaderResponse[]|\Exception[]
+     * @return \Etcdserverpb\MoveLeaderResponse[]|\Grpc\StringifyAble[]
      */
     public function MoveLeader(\Etcdserverpb\MoveLeaderRequest $argument,
       $metadata = [], $options = []) {

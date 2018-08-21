@@ -24,6 +24,7 @@ class ChannelPool extends \SplQueue
 
     public function put(Channel $channel)
     {
+        $channel->errCode = 0;
         $this->push($channel);
     }
 

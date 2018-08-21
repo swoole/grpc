@@ -36,19 +36,7 @@ class Parser
         return $data = substr($data, 5);
     }
 
-    public static function serializeMessage($data)
-    {
-        if (method_exists($data, 'encode')) {
-            return $data->encode();
-        } elseif (method_exists($data, 'serializeToString')) {
-            return $data->serializeToString();
-        } else {
-            /** @noinspection PhpUndefinedMethodInspection */
-            return $data->serialize();
-        }
-    }
-
-    public static function deserializeResponse($deserialize, string $value)
+    public static function deserializeMessage($deserialize, string $value)
     {
         if (empty($value)) {
             return null;
@@ -59,7 +47,7 @@ class Parser
             list($className, $deserializeFunc) = $deserialize;
             /** @var $obj \Google\Protobuf\Internal\Message */
             $obj = new $className();
-            if (method_exists($obj, $deserializeFunc)) {
+            if ($deserializeFunc && method_exists($obj, $deserializeFunc)) {
                 $obj->$deserializeFunc($value);
             } else {
                 /** @noinspection PhpUndefinedMethodInspection */
@@ -88,7 +76,7 @@ class Parser
                 return [$response->headers['grpc-message'] ?? 'Unknown error', $grpc_status, $response];
             }
             $data = $response->data;
-            $reply = self::deserializeResponse($deserialize, $data);
+            $reply = self::deserializeMessage($deserialize, $data);
             $status = (int)($response->headers['grpc-status'] ?? 0 ?: 0);
             return [$reply, $status, $response];
         }

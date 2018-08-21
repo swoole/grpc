@@ -341,6 +341,10 @@ class Client
         $channel = $this->recvChannelMap[$streamId] ?? null;
         if ($channel) {
             $response = $channel->pop($timeout === null ? $this->timeout : $timeout);
+            // timeout
+            if ($response === false && $channel->errCode === -1) {
+                unset($this->recvChannelMap[$streamId]);
+            }
 
             return $response;
         }

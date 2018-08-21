@@ -71,7 +71,7 @@ class Parser
         } elseif ($response->statusCode !== 200) {
             return ['Http status Error', $response->errCode ?: $response->statusCode, $response];
         } else {
-            $grpc_status = (int)$response->headers['grpc-status'] ?? 0;
+            $grpc_status = (int)($response->headers['grpc-status'] ?? 0);
             if ($grpc_status !== 0) {
                 return [$response->headers['grpc-message'] ?? 'Unknown error', $grpc_status, $response];
             }

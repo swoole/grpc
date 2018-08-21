@@ -122,7 +122,8 @@ class Client
         $this->client = new \Swoole\Coroutine\Http2\Client($this->host, $this->port, !empty($opts['ssl_host_name']));
         if (array_key_exists('timeout', $opts)) {
             $this->timeout = $opts['timeout'];
-            unset($opts['timeout']); // the timeout controller is channel
+        } else {
+            $opts['timeout'] = $this->timeout;
         }
         if ($opts['send_yield'] ?? false) {
             $this->sendYield = true;

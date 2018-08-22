@@ -89,7 +89,6 @@ function createSourceOfClass(
         $return_type = str_replace($className . '\\', '', $method->getReturnType());
         $return_type = ($return_type ?: '');
 
-        var_dump($return_type);
         // body
         $call_info = FOUR_SPACE . "// {$method_name} " . ($method->isStatic() ? 'static' : 'non-static') . " method body hook\n";
         $call_info .= FOUR_SPACE .
@@ -152,7 +151,7 @@ class VirtualClient
             if (!($opts['use'] instanceof Client)) {
                 throw new \InvalidArgumentException('parameter use must be instanceof Grpc/Client');
             }
-            $this->client = $opts['use'];
+            $this->use($opts['use']);
         } else {
             $this->client = new Client($hostname, $opts);
         }
@@ -166,6 +165,11 @@ class VirtualClient
     public function start(): bool
     {
         return $this->client->isRunning() ? false : $this->client->start();
+    }
+
+    public function use(?Client $client)
+    {
+        $this->client = $client;
     }
 
 ---generate-hook---

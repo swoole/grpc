@@ -165,10 +165,11 @@ class Client
 
                 if ($response !== false) {
 
-                    if ( // check if it is close message
-                        $this->waitStatus === self::WAIT_CLOSE_FORCE &&
-                        ($message = $response->headers['grpc-message'] ?? null) &&
-                        strpos($message, self::CLOSE_KEYWORD) !== false
+                    // force close
+                    if (
+                        $this->waitStatus === self::WAIT_CLOSE_FORCE // &&
+                        // ($message = $response->headers['grpc-message'] ?? null) &&
+                        // strpos($message, self::CLOSE_KEYWORD) !== false
                     ) {
                         // close request has not recv channel pop wait
                         self::$channelPool->put($this->recvChannelMap[$response->streamId]);
@@ -396,7 +397,7 @@ class Client
 
     public function closeWait($yield = GRPC_DEFAULT_TIMEOUT): bool
     {
-        return $this->wait(self::WAIT_CLOSE, $yield) || $this->close();
+        return $this->wait(self::WAIT_CLOSE, \Co::getuid() > 0 ? $yield : false) || $this->close();
     }
 
     public function closeAfter(float $time): bool

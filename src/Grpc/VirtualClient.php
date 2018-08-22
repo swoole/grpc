@@ -33,7 +33,7 @@ class VirtualClient
             if (!($opts['use'] instanceof Client)) {
                 throw new \InvalidArgumentException('parameter use must be instanceof Grpc/Client');
             }
-            $this->client = $opts['use'];
+            $this->use($opts['use']);
         } else {
             $this->client = new Client($hostname, $opts);
         }
@@ -47,6 +47,11 @@ class VirtualClient
     public function start(): bool
     {
         return $this->client->isRunning() ? false : $this->client->start();
+    }
+
+    public function use(?Client $client)
+    {
+        $this->client = $client;
     }
 
     public static function numStats(): array

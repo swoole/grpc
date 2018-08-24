@@ -24,7 +24,7 @@ class StreamingCall extends BaseCall
         if (!$this->streamId) {
             $this->streamId = $this->client->openStream(
                 $this->method,
-                Parser::pack(Parser::serializeMessage($message))
+                Parser::serializeMessage($message)
             );
             return $this->streamId > 0;
         } else {
@@ -41,7 +41,7 @@ class StreamingCall extends BaseCall
         if (!$this->streamId) {
             $this->streamId = $this->client->openStream($this->method);
         }
-        return $this->client->write($this->streamId, Parser::pack(Parser::serializeMessage($message)), false);
+        return $this->client->write($this->streamId, Parser::serializeMessage($message), false);
     }
 
     public function recv(float $timeout = -1)

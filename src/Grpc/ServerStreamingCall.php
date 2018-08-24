@@ -29,7 +29,7 @@ class ServerStreamingCall extends StreamingCall
         if (!$this->streamId) {
             $this->streamId = $this->client->openStream(
                 $this->method,
-                Parser::pack(Parser::serializeMessage($message))
+                Parser::serializeMessage($message)
             );
             return $this->streamId > 0;
         } else {

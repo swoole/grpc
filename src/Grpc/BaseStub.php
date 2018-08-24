@@ -44,7 +44,7 @@ class BaseStub extends VirtualClient
         $request = new \swoole_http2_request;
         $request->method = 'POST';
         $request->path = $method;
-        $request->data = Parser::pack($argument->serializeToString());
+        $request->data = Parser::serializeMessage($argument);
 
         $streamId = $this->send($request);
 

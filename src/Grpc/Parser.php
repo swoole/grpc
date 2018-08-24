@@ -36,6 +36,19 @@ class Parser
         return $data = substr($data, 5);
     }
 
+    public static function serializeMessage($data)
+    {
+        if (method_exists($data, 'encode')) {
+            $data = $data->encode();
+        } elseif (method_exists($data, 'serializeToString')) {
+            $data = $data->serializeToString();
+        } else {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $data = $data->serialize();
+        }
+        return self::pack($data);
+    }
+
     public static function deserializeMessage($deserialize, string $value)
     {
         if (empty($value)) {

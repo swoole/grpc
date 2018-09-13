@@ -2,8 +2,7 @@
 use Helloworld\HelloReply;
 use Helloworld\HelloRequest;
 
-require __DIR__ . '/../../../vendor/autoload.php';
-require __DIR__ . '/../../include/functions.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 $http = new swoole_http_server('0.0.0.0', 50051, SWOOLE_BASE);
 $http->set([
@@ -23,12 +22,12 @@ $http->on('request', function (swoole_http_request $request, swoole_http_respons
         $response_message->setMessage('Hello ' . $request_message->getName());
         $response->header('content-type', 'application/grpc');
         $response->header('trailer','grpc-status, grpc-message');
-        $headers = [
+        $trailer = [
             "grpc-status" => "0",
             "grpc-message" => ""
         ];
-        foreach ($headers as $header_name => $header_value) {
-            $response->trailer($header_name, $header_value);
+        foreach ($trailer as $trailer_name => $trailer_value) {
+            $response->trailer($trailer_name, $trailer_value);
         }
         $response->end(Grpc\Parser::serializeMessage($response_message));
     } else {

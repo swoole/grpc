@@ -1,15 +1,17 @@
 {
-  "name": "swoole/etcd-client",
+  "name": "swoole/grpc-client",
   "type": "library",
   "keywords": [
     "php",
     "swoole",
+    "coroutine",
+    "grpc",
+    "etcd",
     "http",
     "http2",
-    "client",
-    "coroutine"
+    "client"
   ],
-  "description": "Etcd-v3 PHP Client base on Swoole Http2 Coroutine",
+  "description": "Grpc PHP Client base on Swoole Http2 Coroutine",
   "license": "Apache-2.0",
   "authors": [
     {

@@ -165,7 +165,9 @@ class Client
         if ($this->mainCid = \Co::getuid() <= 0) {
             throw new \BadMethodCallException('You must start it in an alone coroutine.');
         }
-        $ret = $this->client->connect();
+        if (!$this->client->connect()) {
+            return false;
+        }
         // receive wait
         go(function () {
             $this->recvCid = \Co::getuid();
@@ -283,7 +285,7 @@ class Client
             });
         }
 
-        return $ret;
+        return true;
     }
 
     /**
@@ -347,9 +349,9 @@ class Client
 
     public function send(\swoole_http2_request $request): int
     {
-        // get channel
-        $channel = self::$channelPool->get();
-
+        if (!$this->isConnected()) {
+            return 0;
+        }
         if ($this->sendYield) {
             $this->sendChannel->push($request);
             $streamId = $this->sendRetChannel->pop();
@@ -357,7 +359,7 @@ class Client
             $streamId = $this->client->send($request);
         }
         if ($streamId > 0) {
-            $this->recvChannelMap[$streamId] = $channel;
+            $this->recvChannelMap[$streamId] = self::$channelPool->get();
         }
 
         return $streamId;
@@ -365,6 +367,9 @@ class Client
 
     public function write(int $streamId, $data, bool $end = false): bool
     {
+        if (!$this->isConnected()) {
+            return false;
+        }
         if ($this->sendYield) {
             return $this->sendChannel->push([$streamId, $data, $end]) && $this->sendRetChannel->pop();
         } else {

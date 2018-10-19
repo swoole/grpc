@@ -47,12 +47,13 @@ class StreamingCall extends BaseCall
     public function recv(float $timeout = -1)
     {
         if (!$this->streamId) {
-            return false;
-        }
-        $recv = $this->client->recv($this->streamId, $timeout);
-        if (!$this->client->isStreamExist($this->streamId)) {
-            // stream lost, we need re-push
-            $this->streamId = 0;
+            $recv = false;
+        } else {
+            $recv = $this->client->recv($this->streamId, $timeout);
+            if (!$this->client->isStreamExist($this->streamId)) {
+                // stream lost, we need re-push
+                $this->streamId = 0;
+            }
         }
         return Parser::parseToResultArray($recv, $this->deserialize);
     }

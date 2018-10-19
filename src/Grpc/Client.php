@@ -94,6 +94,10 @@ class Client
 
     private $host;
     private $port;
+    private $ssl;
+    /**
+     * @var \Swoole\Coroutine\Http2\Client
+     */
     private $client;
     private $timeout = GRPC_DEFAULT_TIMEOUT;
 
@@ -118,18 +122,27 @@ class Client
         $this->host = $parts['host'];
         $this->port = $parts['port'];
 
-        // create client and init settings
-        $this->client = new \Swoole\Coroutine\Http2\Client($this->host, $this->port, !empty($opts['ssl_host_name']));
         if (array_key_exists('timeout', $opts)) {
             $this->timeout = $opts['timeout'];
-        } else {
-            $opts['timeout'] = $this->timeout;
         }
-        if ($opts['send_yield'] ?? false) {
-            $this->sendYield = true;
-        }
-        $this->client->set($opts);
+        $this->sendYield = $opts['send_yield'] ?? false;
+        $this->ssl = $opts['ssl_host_name'] ?? false;
 
+        $this->constructClient();
+    }
+
+    private function constructClient()
+    {
+        // create client and init settings
+        $opts = [
+            'timeout' => $this->timeout,
+            'send_yield' => $this->sendYield
+        ];
+        if ($this->ssl) {
+            $opts += ['ssl_host_name' => $this->ssl];
+        }
+        $this->client = new \Swoole\Coroutine\Http2\Client($this->host, $this->port, !!$this->ssl);
+        $this->client->set($opts);
         self::$numStats['constructed_num']++;
     }
 
@@ -161,6 +174,10 @@ class Client
                 $response = $this->client->recv(-1);
                 if (self::$debug) {
                     var_dump($response);
+                    if ($response === false && $this->client->errCode !== 0) {
+                        var_dump($this->client->errCode);
+                        var_dump($this->client->errMsg);
+                    }
                 }
 
                 if ($response !== false) {
@@ -201,7 +218,15 @@ class Client
                         _close:
 
                         // if you want to close it or retry connect failed, stop recv loop
-                        $need_kill = $this->waitStatus || !$this->client->connect();
+                        if ($this->waitStatus) {
+                            $need_kill = true;
+                        } else {
+                            if (version_compare(SWOOLE_VERSION, '4.2.3', '<=')) {
+                                // deflater cache bug so we need to new one
+                                $this->constructClient();
+                            }
+                            $need_kill = !$this->client->connect();
+                        }
 
                         // ↑↓ We must `retry-connect` before we push `false` response
                         // ↑↓ Then the pop channel coroutine can knows that if this client is available
@@ -282,6 +307,16 @@ class Client
     public function isStreamExist(int $streamId)
     {
         return isset($this->recvChannelMap[$streamId]);
+    }
+
+    public function getClient(): \Swoole\Coroutine\Http2\Client
+    {
+        return $this->client;
+    }
+
+    public function getTimeout(): float
+    {
+        return $this->timeout;
     }
 
     public function setTimeout(float $timeout): void

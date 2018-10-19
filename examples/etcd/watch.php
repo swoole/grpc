@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 // The Watcher
 go(function () {
-    $watchClient = new Etcdserverpb\WatchClient('127.0.0.1:2379');
+    $watchClient = new Etcdserverpb\WatchClient(GRPC_SERVER_DEFAULT_URI);
     $watchClient->start();
 
     $watchCall = $watchClient->Watch();
@@ -53,7 +53,7 @@ go(function () {
 
 // The Writer Put and Delete
 go(function () {
-    $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379');
+    $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
     $kvClient->start();
     go(function () use ($kvClient) {
         $request = new Etcdserverpb\PutRequest();

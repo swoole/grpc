@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 go(function () {
-    $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379');
+    $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
     $kvClient->start();
     $request = new Etcdserverpb\PutRequest();
     $request->setPrevKv(true);

@@ -3,12 +3,12 @@
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 go(function () {
-    $grpcClient = new Grpc\Client('127.0.0.1:2379');
+    $grpcClient = new Grpc\Client(GRPC_SERVER_DEFAULT_URI);
     $grpcClient->start();
     // use in different type clients
 
     go(function () use ($grpcClient) {
-        $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379', ['use' => $grpcClient]);
+        $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI, ['use' => $grpcClient]);
         $request = new Etcdserverpb\PutRequest();
         $request->setPrevKv(true);
         $request->setKey('Hello');
@@ -22,7 +22,7 @@ go(function () {
     });
 
     go(function () use ($grpcClient) {
-        $authClient = new Etcdserverpb\AuthClient('127.0.0.1:2379', ['use' => $grpcClient]);
+        $authClient = new Etcdserverpb\AuthClient(GRPC_SERVER_DEFAULT_URI, ['use' => $grpcClient]);
 
         $userRequest = new Etcdserverpb\AuthUserAddRequest();
         $userNames = ['rango', 'twosee', 'gxh', 'stone', 'sjl'];

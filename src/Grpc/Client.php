@@ -95,11 +95,12 @@ class Client
     private $host;
     private $port;
     private $ssl;
+    private $opts;
     /**
      * @var \Swoole\Coroutine\Http2\Client
      */
     private $client;
-    private $timeout = GRPC_DEFAULT_TIMEOUT;
+    private $timeout;
 
     public static function numStats(): array
     {
@@ -122,11 +123,17 @@ class Client
         $this->host = $parts['host'];
         $this->port = $parts['port'];
 
-        if (array_key_exists('timeout', $opts)) {
-            $this->timeout = $opts['timeout'];
-        }
-        $this->sendYield = $opts['send_yield'] ?? false;
-        $this->ssl = $opts['ssl_host_name'] ?? false;
+        $default_opts = [
+            'timeout' => GRPC_DEFAULT_TIMEOUT,
+            'send_yield' => false,
+            'ssl' => false,
+            'ssl_host_name' => ''
+        ];
+        $this->opts = $opts + $default_opts;
+        $this->timeout = &$this->opts['timeout'];
+        $this->sendYield = &$opts['send_yield'];
+        $this->ssl = &$this->opts['ssl'];
+        $this->ssl = $opts['ssl'] || !empty($opts['ssl_host_name']);
 
         $this->constructClient();
     }
@@ -134,15 +141,8 @@ class Client
     private function constructClient()
     {
         // create client and init settings
-        $opts = [
-            'timeout' => $this->timeout,
-            'send_yield' => $this->sendYield
-        ];
-        if ($this->ssl) {
-            $opts += ['ssl_host_name' => $this->ssl];
-        }
-        $this->client = new \Swoole\Coroutine\Http2\Client($this->host, $this->port, !!$this->ssl);
-        $this->client->set($opts);
+        $this->client = new \Swoole\Coroutine\Http2\Client($this->host, $this->port, $this->ssl);
+        $this->client->set($this->opts);
         self::$numStats['constructed_num']++;
     }
 

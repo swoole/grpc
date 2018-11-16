@@ -46,7 +46,7 @@ class StreamingCall extends BaseCall
 
     public function recv(float $timeout = -1)
     {
-        if (!$this->streamId) {
+        if ($this->streamId <= 0) {
             $recv = false;
         } else {
             $recv = $this->client->recv($this->streamId, $timeout);

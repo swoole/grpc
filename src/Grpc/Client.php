@@ -131,9 +131,9 @@ class Client
         ];
         $this->opts = $opts + $default_opts;
         $this->timeout = &$this->opts['timeout'];
-        $this->sendYield = &$opts['send_yield'];
+        $this->sendYield = &$this->opts['send_yield'];
         $this->ssl = &$this->opts['ssl'];
-        $this->ssl = $opts['ssl'] || !empty($opts['ssl_host_name']);
+        $this->ssl = !!$this->ssl || !!$this->opts['ssl_host_name'];
 
         $this->constructClient();
     }
@@ -379,7 +379,9 @@ class Client
 
     public function recv(int $streamId, float $timeout = null)
     {
-        assert($streamId > 0);
+        if (!$this->isConnected() || $streamId <= 0) {
+            return false;
+        }
         $channel = $this->recvChannelMap[$streamId] ?? null;
         if ($channel) {
             $response = $channel->pop($timeout === null ? $this->timeout : $timeout);
@@ -397,6 +399,9 @@ class Client
 
     private function wait(int $type, $yield = true): bool
     {
+        if (!$this->isConnected()) {
+            return false;
+        }
         $this->waitStatus = $type;
         if ($this->waitStatus === self::WAIT_CLOSE) {
             $ret = true;

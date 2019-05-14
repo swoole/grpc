@@ -45,6 +45,10 @@ class BaseStub extends VirtualClient
         $request->method = 'POST';
         $request->path = $method;
         $request->data = Parser::serializeMessage($argument);
+	$request->headers = [
+	    'content-type' => 'application/grpc',
+	    'te' => 'trailers',
+	];
 
         $streamId = $this->send($request);
 

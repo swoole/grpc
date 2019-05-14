@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-__CURRENT__=`pwd`
-__DIR__=$(cd "$(dirname "$0")";pwd)
 
-cd ${__DIR__} &&
+current=$(pwd)
+
 ./generator \
---proto_path=./../src/Grpc/Proto \
---php_out=./../src/Grpc \
---grpc_out=./../src/Grpc \
---grpc_php_out=./src/Grpc \
---plugin=protoc-gen-grpc=${__CURRENT__}/$1 \
-./../src/Grpc/Proto
-cd ${__CURRENT__}
+--proto_path=$current/../src/Grpc/Proto \
+--php_out=$current/../src/Grpc \
+--grpc_out=$current/../src/Grpc \
+--grpc_php_out=$current/../src/Grpc/Services \
+--plugin=protoc-gen-grpc=$current/$1 \
+--custom_plugin=protoc-gen-grpc-php=$current/$2 \
+$current/../src/Grpc/Proto

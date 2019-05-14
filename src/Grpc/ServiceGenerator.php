@@ -62,16 +62,7 @@ class ServiceGenerator implements CodeGeneratorInterface
 
     private function getClassFilename($className, $namespaceName)
     {
-        if ($namespaceName) {
-            $baseName = str_replace(
-                PhpMsgGenerator::PHP_NAMESPACE_SEPARATOR,
-                DIRECTORY_SEPARATOR,
-                $namespaceName . PhpMsgGenerator::PHP_NAMESPACE_SEPARATOR . $className
-            );
-        } else {
-            $baseName = $className;
-        }
-        return $baseName . '.php';
+        return $className . '.php';
     }
 
     /**

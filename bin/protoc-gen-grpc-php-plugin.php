@@ -4,6 +4,8 @@
 $file = __DIR__ . '/../vendor/autoload.php';
 if (file_exists($file)) {
     require_once $file;
+} else if (file_exists($file = __DIR__ . "/../autoload.php")) {
+    require_once $file;
 } else if (file_exists($file = __DIR__ . "/../../autoload.php")) {
     require_once $file;
 } else {

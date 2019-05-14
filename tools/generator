@@ -79,7 +79,7 @@ function generateClient(string $proto_dir)
     }
 }
 
-function generateFromProto(string $proto_path, string $php_out, string $grpc_out, string $grpc_php_out, string $plugin, array $proto_list)
+function generateFromProto(string $proto_path, string $php_out, string $grpc_out, string $grpc_php_out, string $plugin, string $custom_plugin ,array $proto_list)
 {
     $plugin_file = explode('=', $plugin)[1] ?? null;
     if (!$plugin_file) {
@@ -89,21 +89,29 @@ function generateFromProto(string $proto_path, string $php_out, string $grpc_out
         exit("Can't find the plugin generator file [{$plugin_file}]");
     }
 
-    function realGenerate($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, array $proto_list)
+    $custom_plugin_file = explode('=', $plugin)[1] ?? null;
+    if (!$custom_plugin_file) {
+        $custom_plugin = "protoc-gen-grpc-php={$custom_plugin}";
+    }
+    if (!file_exists($custom_plugin_file)) {
+        exit("Can't find the custom plugin generator file [{$custom_plugin_file}]");
+    }
+
+    function realGenerate($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $custom_plugin, array $proto_list)
     {
         foreach ($proto_list as $key => $proto_file) {
             if (is_dir($proto_file)) {
                 $proto_deep_list = scan_dir($proto_file, function (string $f) {
                     return substr($f, -6, 6) === '.proto';
                 });
-                realGenerate($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $proto_deep_list);
+                realGenerate($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $custom_plugin, $proto_deep_list);
             } else {
-                `protoc --proto_path={$proto_path} --php_out={$php_out} --grpc_out={$grpc_out} --plugin={$plugin} --grpc-php_out=.{$grpc_php_out} --plugin=protoc-gen-grpc-php=../bin/protoc-gen-grpc-plugin.php {$proto_file}`;
+                `protoc --proto_path={$proto_path} --php_out={$php_out} --grpc_out={$grpc_out} --plugin={$plugin} --grpc-php_out={$grpc_php_out} --plugin={$custom_plugin} {$proto_file}`;
             }
         }
     }
 
-    realGenerate($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $proto_list);
+    realGenerate($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $custom_plugin, $proto_list);
 }
 
 function get_command(&$command, &$options, &$params): void
@@ -141,9 +149,10 @@ function get_command(&$command, &$options, &$params): void
             'php_out' => null,
             'grpc_out' => null,
             'grpc_php_out' => null,
-            'plugin' => __DIR__ . './../../grpc/bins/opt/grpc_php_plugin'
+            'plugin' => __DIR__ . './../../grpc/bins/opt/grpc_php_plugin',
+            'custom_plugin' => null,
         ];
-        $proto_path = $php_out = $grpc_out = $grpc_php_out = $plugin = '';
+        $proto_path = $php_out = $grpc_out = $grpc_php_out = $plugin = $custom_plugin = '';
         foreach ($needle_params as $param_name => $param_default_value) {
             if (empty($options[$param_name])) {
                 if ($param_default_value === null) {
@@ -159,7 +168,7 @@ function get_command(&$command, &$options, &$params): void
             }
             $$param_name = $options[$param_name];
         }
-        generateFromProto($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $params);
+        generateFromProto($proto_path, $php_out, $grpc_out, $grpc_php_out, $plugin, $custom_plugin, $params);
         generateClient($php_out);
     }
 })();

@@ -45,5 +45,5 @@
     "optimize-autoloader": true,
     "sort-packages": true
   },
-  "bin": ["bin/protoc-gen-grpc-plugin.php", "tools/generator"]
+  "bin": ["tools/generator"]
 }

@@ -24,7 +24,7 @@
   },
   "require": {
     "php": ">=7.1",
-    "google/protobuf": "^3"
+    "liues1992/php-protobuf-generator": "~0.1"
   },
   "autoload": {
     "classmap": [

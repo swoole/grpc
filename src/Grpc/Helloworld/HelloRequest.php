@@ -19,6 +19,10 @@ class HelloRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string name = 1;</code>
      */
     private $name = '';
+    /**
+     * Generated from protobuf field <code>string addr = 2;</code>
+     */
+    private $addr = '';
 
     /**
      * Constructor.
@@ -27,6 +31,7 @@ class HelloRequest extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type string $name
+     *     @type string $addr
      * }
      */
     public function __construct($data = NULL) {
@@ -52,6 +57,28 @@ class HelloRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->name = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string addr = 2;</code>
+     * @return string
+     */
+    public function getAddr()
+    {
+        return $this->addr;
+    }
+
+    /**
+     * Generated from protobuf field <code>string addr = 2;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setAddr($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->addr = $var;
 
         return $this;
     }

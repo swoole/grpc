@@ -14,6 +14,8 @@ go(function () use ($name) {
     $request->setName($name);
     list($reply, $status) = $greeterClient->SayHello($request);
     $message = $reply->getMessage();
+    $data = $reply->getData();
     echo "{$message}\n";
+    echo "{$data}\n";
     $greeterClient->close();
 });

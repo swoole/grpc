@@ -7,6 +7,7 @@ cd ${__DIR__} &&
 --proto_path=./../src/Grpc/Proto \
 --php_out=./../src/Grpc \
 --grpc_out=./../src/Grpc \
+--grpc_php_out=./src/Grpc \
 --plugin=protoc-gen-grpc=${__CURRENT__}/$1 \
 ./../src/Grpc/Proto
 cd ${__CURRENT__}

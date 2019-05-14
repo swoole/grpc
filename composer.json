@@ -1,22 +1,23 @@
 {
-  "name": "swoole/grpc-client",
+  "name": "luoxiaojun/grpc",
   "type": "library",
   "keywords": [
     "php",
     "swoole",
     "coroutine",
     "grpc",
-    "etcd",
     "http",
     "http2",
-    "client"
+    "client",
+    "service",
+    "generator"
   ],
-  "description": "Grpc PHP Client base on Swoole Http2 Coroutine",
+  "description": "Grpc PHP Client base on Swoole Http2 Coroutine & Service Generator",
   "license": "Apache-2.0",
   "authors": [
     {
-      "name": "twosee",
-      "email": "twose@qq.com"
+      "name": "luoxiaojun",
+      "email": "luoxiaojun1992@sina.cn"
     }
   ],
   "support": {
@@ -28,8 +29,7 @@
   },
   "autoload": {
     "classmap": [
-      "src/Grpc",
-      "src/Etcd"
+      "src/Grpc"
     ],
     "files": [
       "src/include/functions.php"
@@ -44,5 +44,6 @@
   "config": {
     "optimize-autoloader": true,
     "sort-packages": true
-  }
+  },
+  "bin": ["bin/protoc-gen-grpc-plugin.php"]
 }

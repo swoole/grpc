@@ -8,6 +8,8 @@ if (file_exists($file)) {
     require_once $file;
 } else if (file_exists($file = __DIR__ . "/../../autoload.php")) {
     require_once $file;
+} else if (file_exists($file = __DIR__ . "/../../../autoload.php")) {
+    require_once $file;
 } else {
     throw new \RuntimeException("cannot find autoload.php");
 }

@@ -73,6 +73,7 @@ class ServiceGenerator implements CodeGeneratorInterface
         foreach ($file->getService() as $service) {
             $this->_createInterface($service, $file);
             $this->_createService($service, $file);
+            $this->_createClientStub($service, $file);
         }
     }
 
@@ -126,7 +127,7 @@ class ServiceGenerator implements CodeGeneratorInterface
          * namespace
          */
         $buffer->newline()
-            ->append("namespace App\services;")->newline()
+            ->append("namespace App\\services;")->newline()
             ->append($comment)
             ->append("interface $shortName")
             ->append('{')
@@ -158,7 +159,7 @@ class ServiceGenerator implements CodeGeneratorInterface
          * namespace
          */
         $buffer->newline()
-            ->append("namespace App\services;")->newline()
+            ->append("namespace App\\services;")->newline()
             ->append($comment)
             ->append("class $serviceName extends \\SwFwLess\\services\\GrpcUnaryService implements \\App\services\\$interfaceName")
             ->append('{')
@@ -170,6 +171,57 @@ class ServiceGenerator implements CodeGeneratorInterface
         $buffer->newline();
         $buffer->append('}');
         $this->generateClass($serviceName, $namespace, $buffer->__toString());
+    }
+
+    /**
+     * @param ServiceDescriptor $service
+     * @param FileDescriptor $file
+     */
+    private function _createClientStub(ServiceDescriptor $service, FileDescriptor $file)
+    {
+        $buffer = new CodeStringBuffer(self::TAB);
+        $fullName = $service->getClass();
+        list($shortName, $namespace) = $this->parseFullClassName($fullName);
+        $clientName = $shortName . "Client";
+        $comment = new CommentStringBuffer(self::TAB);
+        $comment->alignWithBuffer($buffer);
+        $this->appendCommentFromSourceCode($comment, $file, $service, false);
+        $comment->newline();
+        $comment->append("@mixin \\{$namespace}\\{$shortName}Client");
+        /**
+         * namespace
+         */
+        $buffer->newline()
+            ->append("namespace App\\services;")->newline()
+            ->append($comment)
+            ->append("class $clientName")
+            ->append('{')
+            ->incrIndentation()
+            ->newline()
+            ->append('use \\SwFwLess\\components\\traits\\Singleton;')
+            ->newline()
+            ->append('public function __call($name, $arguments)')
+            ->append('{')
+            ->incrIndentation()
+            ->append('$client = new ' . "\\{$namespace}\\{$shortName}Client('127.0.0.1:50051');")
+            ->append('$client->start();')
+            ->append('list($reply, $status) = call_user_func_array([$client, $name], $arguments);')
+            ->append('$client->close();')
+            ->newline()
+            ->append('if (!$status) {')
+            ->incrIndentation()
+            ->append('return $reply;')
+            ->decrIndentation()
+            ->append('}')
+            ->newline()
+            ->append('return null;')
+            ->decrIndentation()
+            ->append('}')
+            ->decrIndentation()
+            ->newline()
+            ->append('}');
+
+        $this->generateClass($clientName, $namespace, $buffer->__toString());
     }
 
     /**

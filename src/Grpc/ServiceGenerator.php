@@ -198,8 +198,6 @@ class ServiceGenerator implements CodeGeneratorInterface
             ->append('{')
             ->incrIndentation()
             ->newline()
-            ->append('use \\SwFwLess\\components\\traits\\Singleton;')
-            ->newline()
             ->append('protected $grpc_client = ' . "\\{$namespace}\\{$shortName}Client" . '::class;')
             ->decrIndentation()
             ->newline()

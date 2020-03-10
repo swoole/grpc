@@ -73,9 +73,9 @@ class Parser
     }
 
     /**
-     * @param \swoole_http2_response|null $response
+     * @param \Swoole\Http2\Response|null $response
      * @param $deserialize
-     * @return Message[]|\Grpc\StringifyAble[]|\swoole_http2_response[]
+     * @return Message[]|\Grpc\StringifyAble[]|\Swoole\Http2\Response[]
      */
     public static function parseToResultArray($response, $deserialize): array
     {

@@ -5,17 +5,17 @@ use Helloworld\HelloRequest;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-$http = new swoole_http_server('0.0.0.0', 50051, SWOOLE_BASE);
+$http = new Swoole\Http\Server('0.0.0.0', 50051, SWOOLE_BASE);
 $http->set([
     'log_level' => SWOOLE_LOG_INFO,
     'trace_flags' => 0,
     'worker_num' => 1,
     'open_http2_protocol' => true
 ]);
-$http->on('workerStart', function (swoole_http_server $server) {
+$http->on('workerStart', function (Swoole\Http\Server $server) {
     echo "php " . __DIR__ . "/greeter_client.php\n";
 });
-$http->on('request', function (swoole_http_request $request, swoole_http_response $response) use ($http) {
+$http->on('request', function (Swoole\Http\Request $request, Swoole\Http\Response $response) use ($http) {
     $path = $request->server['request_uri'];
     $route = [
         '/helloworld.Greeter/SayHello' => function (...$args) {

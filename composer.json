@@ -6,6 +6,7 @@
     "swoole",
     "coroutine",
     "grpc",
+    "etcd",
     "http",
     "http2",
     "client",
@@ -29,7 +30,8 @@
   },
   "autoload": {
     "classmap": [
-      "src/Grpc"
+      "src/Grpc",
+      "src/Etcd"
     ],
     "files": [
       "src/include/functions.php"

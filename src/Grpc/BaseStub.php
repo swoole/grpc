@@ -46,7 +46,7 @@ class BaseStub extends VirtualClient
         $request->path = $method;
         $request->data = Parser::serializeMessage($argument);
         if (isset($options['headers'])) {
-            $request->headers = $options["headers"];
+            $request->headers = $options['headers'];
         }
         $streamId = $this->send($request);
 

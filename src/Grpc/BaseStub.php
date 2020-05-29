@@ -41,7 +41,7 @@ class BaseStub extends VirtualClient
         array $metadata = [],
         array $options = []
     ) {
-        $request = new \Swoole\Http2\Request;
+        $request = new Request;
         $request->method = 'POST';
         $request->path = $method;
         $request->data = Parser::serializeMessage($argument);

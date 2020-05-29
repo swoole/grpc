@@ -273,7 +273,7 @@ class Client
                     $sendData = $this->sendChannel->pop(-1);
                     if ($sendData === 0) {
                         break;
-                    } elseif ($sendData instanceof \Swoole\Http2\Request) {
+                    } elseif ($sendData instanceof Request) {
                         $ret = $this->client->send($sendData);
                     } else {
                         $ret = $this->client->write(...$sendData);
@@ -336,7 +336,7 @@ class Client
      */
     public function openStream(string $path, $data = null, string $method = 'POST'): int
     {
-        $request = new \Swoole\Http2\Request;
+        $request = new Request;
         $request->method = $method;
         $request->path = $path;
         if ($data) {
@@ -347,7 +347,7 @@ class Client
         return $this->send($request);
     }
 
-    public function send(\Swoole\Http2\Request $request): int
+    public function send(Request $request): int
     {
         if (!$this->isConnected()) {
             return 0;
@@ -407,7 +407,7 @@ class Client
             $ret = true;
             goto _yield;
         }
-        $closeRequest = new \Swoole\Http2\Request;
+        $closeRequest = new Request;
         $closeRequest->method = 'GET';
         $closeRequest->path = self::CLOSE_KEYWORD;
 

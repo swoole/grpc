@@ -108,7 +108,7 @@ class VirtualClient
         return $this->client->openStream($path, $data, $method);
     }
     
-    public function send(\Swoole\Http2\Request $request): int
+    public function send(Request $request): int
     {
         // send non-static method body hook
         return $this->client->send($request);

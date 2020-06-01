@@ -81,19 +81,23 @@ Etcd的几个基本操作的使用
 #### Put
 
 ```php
-$kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379');
-$request = new Etcdserverpb\PutRequest();
-$request->setPrevKv(true);
-$request->setKey('Hello');
-$request->setValue('Swoole');
-list($reply, $status) = $kvClient->Put($request);
-if ($status === 0) {
-    echo "{$reply->getPrevKv()->getKey()}\n";
-    echo "{$reply->getPrevKv()->getValue()}\n";
-} else {
-    echo "Error#{$status}\n";
-}
-$kvClient->close();
+use Swoole\Coroutine;
+
+Coroutine::create(function () {
+    $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
+    $request = new Etcdserverpb\PutRequest();
+    $request->setPrevKv(true);
+    $request->setKey('Hello');
+    $request->setValue('Swoole');
+    [$reply, $status] = $kvClient->Put($request);
+    if ($status === 0) {
+        echo "{$reply->getPrevKv()->getKey()}\n";
+        echo "{$reply->getPrevKv()->getValue()}\n";
+    } else {
+        echo "Error#{$status}: {$reply}\n";
+    }
+    $kvClient->close();
+});
 ```
 
 #### Watch
@@ -101,13 +105,18 @@ $kvClient->close();
 > 创建一个协程负责Watch, 创建两个协程定时写入/删除键值以便观察效果
 
 ```php
+use Etcdserverpb\WatchCreateRequest;
+use Etcdserverpb\WatchCreateRequest\FilterType;
+use Etcdserverpb\WatchRequest;
+use Swoole\Coroutine;
+
 // The Watcher
-go(function () {
-    $watchClient = new Etcdserverpb\WatchClient('127.0.0.1:2379');
+Coroutine::create(function () {
+    $watchClient = new Etcdserverpb\WatchClient(GRPC_SERVER_DEFAULT_URI);
 
     $watchCall = $watchClient->Watch();
-    $request = new \Etcdserverpb\WatchRequest();
-    $createRequest = new \Etcdserverpb\WatchCreateRequest();
+    $request = new WatchRequest();
+    $createRequest = new WatchCreateRequest();
     $createRequest->setKey('Hello');
     $request->setCreateRequest($createRequest);
 
@@ -115,7 +124,7 @@ go(function () {
     $watchCall->push($request);
     /**@var $reply Etcdserverpb\WatchResponse */
     while (true) {
-        list($reply, $status) = $watchCall->recv();
+        [$reply, $status] = $watchCall->recv();
         if ($status === 0) { // success
             if ($reply->getCreated() || $reply->getCanceled()) {
                 continue;
@@ -148,17 +157,17 @@ go(function () {
 });
 
 // The Writer Put and Delete
-go(function () {
-    $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379');
-    go(function () use ($kvClient) {
+Coroutine::create(function () {
+    $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
+    Coroutine::create(function () use ($kvClient) {
         $request = new Etcdserverpb\PutRequest();
         $request->setKey('Hello');
         $request->setPrevKv(true);
         while (true) {
             static $count = 0;
-            co::sleep(.5);
+            Coroutine::sleep(.5);
             $request->setValue('Swoole#' . (++$count));
-            list($reply, $status) = $kvClient->Put($request);
+            [$reply, $status] = $kvClient->Put($request);
             if ($status !== 0) {
                 echo "Error#{$status}: {$reply}\n";
                 break;
@@ -166,13 +175,13 @@ go(function () {
         }
         $kvClient->close();
     });
-    go(function () use ($kvClient) {
+    Coroutine::create(function () use ($kvClient) {
         $request = new Etcdserverpb\DeleteRangeRequest();
         $request->setKey('Hello');
         $request->setPrevKv(true);
         while (true) {
-            co::sleep(1);
-            list($reply, $status) = $kvClient->DeleteRange($request);
+            Coroutine::sleep(1);
+            [$reply, $status] = $kvClient->DeleteRange($request);
             if ($status !== 0) {
                 echo "Error#{$status}: {$reply}\n";
                 break;
@@ -189,17 +198,19 @@ go(function () {
 > 用户添加/展示/删除以及展示了如何让不同类型的EtcdClient能够使用同一个Grpc\\Client创建的连接
 
 ```php
-go(function () {
-    $grpcClient = new Grpc\Client('127.0.0.1:2379');
+use Swoole\Coroutine;
+
+Coroutine::create(function () {
+    $grpcClient = new Grpc\Client(GRPC_SERVER_DEFAULT_URI);
     // use in different type clients
 
-    go(function () use ($grpcClient) {
-        $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379', ['use' => $grpcClient]);
+    Coroutine::create(function () use ($grpcClient) {
+        $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI, ['use' => $grpcClient]);
         $request = new Etcdserverpb\PutRequest();
         $request->setPrevKv(true);
         $request->setKey('Hello');
         $request->setValue('Swoole');
-        list($reply, $status) = $kvClient->Put($request);
+        [$reply, $status] = $kvClient->Put($request);
         if ($status === 0) {
             echo "\n=== PUT KV OK ===\n";
         } else {
@@ -207,21 +218,21 @@ go(function () {
         }
     });
 
-    go(function () use ($grpcClient) {
-        $authClient = new Etcdserverpb\AuthClient('127.0.0.1:2379', ['use' => $grpcClient]);
+    Coroutine::create(function () use ($grpcClient) {
+        $authClient = new Etcdserverpb\AuthClient(GRPC_SERVER_DEFAULT_URI, ['use' => $grpcClient]);
 
         $userRequest = new Etcdserverpb\AuthUserAddRequest();
-        $userNames = ['rango', 'twosee', 'gxh', 'stone', 'sjl'];
+        $userNames = ['ranCoroutine::create', 'twosee', 'gxh', 'stone', 'sjl'];
         foreach ($userNames as $username) {
             $userRequest->setName($username);
-            list($reply, $status) = $authClient->UserAdd($userRequest);
+            [$reply, $status] = $authClient->UserAdd($userRequest);
             if ($status !== 0) {
                 goto _error;
             }
         }
 
         $useListRequest = new Etcdserverpb\AuthUserListRequest();
-        list($reply, $status) = $authClient->UserList($useListRequest);
+        [$reply, $status] = $authClient->UserList($useListRequest);
         if ($status !== 0) {
             goto _error;
         }
@@ -235,7 +246,7 @@ go(function () {
         $userRequest = new Etcdserverpb\AuthUserDeleteRequest();
         foreach ($userNames as $username) {
             $userRequest->setName($username);
-            list($reply, $status) = $authClient->UserDelete($userRequest);
+            [$reply, $status] = $authClient->UserDelete($userRequest);
             if ($status !== 0) {
                 goto _error;
             }
@@ -253,4 +264,3 @@ go(function () {
 
 });
 ```
-

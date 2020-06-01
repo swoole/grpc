@@ -2,17 +2,19 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-go(function () {
+use Swoole\Coroutine;
+
+Coroutine::create(function () {
     $grpcClient = new Grpc\Client(GRPC_SERVER_DEFAULT_URI);
     // use in different type clients
 
-    go(function () use ($grpcClient) {
+    Coroutine::create(function () use ($grpcClient) {
         $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI, ['use' => $grpcClient]);
         $request = new Etcdserverpb\PutRequest();
         $request->setPrevKv(true);
         $request->setKey('Hello');
         $request->setValue('Swoole');
-        list($reply, $status) = $kvClient->Put($request);
+        [$reply, $status] = $kvClient->Put($request);
         if ($status === 0) {
             echo "\n=== PUT KV OK ===\n";
         } else {
@@ -20,21 +22,21 @@ go(function () {
         }
     });
 
-    go(function () use ($grpcClient) {
+    Coroutine::create(function () use ($grpcClient) {
         $authClient = new Etcdserverpb\AuthClient(GRPC_SERVER_DEFAULT_URI, ['use' => $grpcClient]);
 
         $userRequest = new Etcdserverpb\AuthUserAddRequest();
         $userNames = ['rango', 'twosee', 'gxh', 'stone', 'sjl'];
         foreach ($userNames as $username) {
             $userRequest->setName($username);
-            list($reply, $status) = $authClient->UserAdd($userRequest);
+            [$reply, $status] = $authClient->UserAdd($userRequest);
             if ($status !== 0) {
                 goto _error;
             }
         }
 
         $useListRequest = new Etcdserverpb\AuthUserListRequest();
-        list($reply, $status) = $authClient->UserList($useListRequest);
+        [$reply, $status] = $authClient->UserList($useListRequest);
         if ($status !== 0) {
             goto _error;
         }
@@ -48,7 +50,7 @@ go(function () {
         $userRequest = new Etcdserverpb\AuthUserDeleteRequest();
         foreach ($userNames as $username) {
             $userRequest->setName($username);
-            list($reply, $status) = $authClient->UserDelete($userRequest);
+            [$reply, $status] = $authClient->UserDelete($userRequest);
             if ($status !== 0) {
                 goto _error;
             }

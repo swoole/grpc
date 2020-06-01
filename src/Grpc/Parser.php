@@ -57,7 +57,7 @@ class Parser
             $value = self::unpack($value);
         }
         if (is_array($deserialize)) {
-            list($className, $deserializeFunc) = $deserialize;
+            [$className, $deserializeFunc] = $deserialize;
             /** @var $obj \Google\Protobuf\Internal\Message */
             $obj = new $className();
             if ($deserializeFunc && method_exists($obj, $deserializeFunc)) {
@@ -84,7 +84,7 @@ class Parser
         } elseif ($response->statusCode !== 0 && (($response->statusCode / 100) % 10) !== 2) {
             return ['Http status Error', $response->errCode ?: $response->statusCode, $response];
         } else {
-            $grpc_status = (int)($response->headers['grpc-status'] ?? 0);
+            $grpc_status = (int) ($response->headers['grpc-status'] ?? 0);
             if ($grpc_status !== 0) {
                 return [$response->headers['grpc-message'] ?? 'Unknown error', $grpc_status, $response];
             }

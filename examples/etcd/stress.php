@@ -2,9 +2,11 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
+use Swoole\Coroutine;
+
 ini_set('memory_limit', '154M');
-co::set(['max_coroutine' => 10002]);
-go(function () {
+Coroutine::set(['max_coroutine' => 10002]);
+Coroutine::create(function () {
     $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
     $request = new Etcdserverpb\PutRequest();
     $request->setPrevKv(true);
@@ -12,9 +14,9 @@ go(function () {
 
     $start = microtime(true);
     for ($i = 10000; $i--;) {
-        go(function () use ($kvClient, $request, $i) {
+        Coroutine::create(function () use ($kvClient, $request, $i) {
             $request->setKey("Hello{$i}");
-            list($reply, $status) = $kvClient->Put($request);
+            [$reply, $status] = $kvClient->Put($request);
             assert($reply->getPrevKv()->getKey() === "Hello{$i}");
             if ($status !== 0) {
                 echo "Error#{$status}: {$reply}\n";

@@ -1,5 +1,5 @@
 {
-  "name": "swoole/grpc-client",
+  "name": "swoole/grpc",
   "type": "library",
   "keywords": [
     "php",

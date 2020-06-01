@@ -363,7 +363,7 @@ class Client
             return;
         }
         $this->closing = 2;
-        $this->closeWaiter = new Channel;
+        $this->closeWaiter = $closeWaiter = new Channel;
         $n = 0;
         if ($this->recvCid > 0) {
             $n++;
@@ -372,7 +372,7 @@ class Client
             $n++;
         }
         while ($n--) {
-            $this->closeWaiter->pop();
+            $closeWaiter->pop();
         }
     }
 }

@@ -81,7 +81,7 @@ class Parser
     {
         if (!$response) {
             return ['No response', GRPC_ERROR_NO_RESPONSE, $response];
-        } elseif ($response->statusCode !== 200) {
+        } elseif ($response->statusCode !== 0 && (($response->statusCode / 100) % 10) !== 2) {
             return ['Http status Error', $response->errCode ?: $response->statusCode, $response];
         } else {
             $grpc_status = (int)($response->headers['grpc-status'] ?? 0);
@@ -90,7 +90,7 @@ class Parser
             }
             $data = $response->data;
             $reply = self::deserializeMessage($deserialize, $data);
-            $status = (int)($response->headers['grpc-status'] ?? 0 ?: 0);
+            $status = (int) (($response->headers['grpc-status'] ?? 0) ?: 0);
             return [$reply, $status, $response];
         }
     }

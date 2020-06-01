@@ -15,7 +15,7 @@
   +----------------------------------------------------------------------+
 */
 
-const GRPC_DEFAULT_TIMEOUT = 3.0;
+const GRPC_DEFAULT_TIMEOUT = -1;
 const GRPC_ERROR_NO_RESPONSE = -1;
 define('GRPC_SERVER_DEFAULT_URI', ($tmp = getenv('GRPC_SERVER_DEFAULT_URI')) ? $tmp : '127.0.0.1:2379');
 

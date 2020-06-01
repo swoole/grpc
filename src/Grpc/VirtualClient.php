@@ -44,11 +44,6 @@ class VirtualClient
         return $this->client;
     }
 
-    public function start(): bool
-    {
-        return $this->client->isRunning() ? false : $this->client->start();
-    }
-
     public function use(?Client $client)
     {
         $this->client = $client;
@@ -66,7 +61,7 @@ class VirtualClient
         \Grpc\Client::debug($enable);
     }
     
-    public function __get($name)
+    public function __get(string $name)
     {
         // __get non-static method body hook
         return $this->client->__get($name);
@@ -90,10 +85,22 @@ class VirtualClient
         return $this->client->isRunning();
     }
     
-    public function isStreamExist(int $streamId)
+    public function isStreamExist(int $streamId): bool
     {
         // isStreamExist non-static method body hook
         return $this->client->isStreamExist($streamId);
+    }
+    
+    public function getClient(): \Swoole\Coroutine\Http2\Client
+    {
+        // getClient non-static method body hook
+        return $this->client->getClient();
+    }
+    
+    public function getTimeout(): float
+    {
+        // getTimeout non-static method body hook
+        return $this->client->getTimeout();
     }
     
     public function setTimeout(float $timeout): void
@@ -102,13 +109,13 @@ class VirtualClient
         $this->client->setTimeout($timeout);
     }
     
-    public function openStream(string $path, $data = null, string $method = 'POST'): int
+    public function openStream(string $path, $data = '', string $method = '', bool $use_pipeline_read = false): int
     {
         // openStream non-static method body hook
-        return $this->client->openStream($path, $data, $method);
+        return $this->client->openStream($path, $data, $method, $use_pipeline_read);
     }
     
-    public function send(Request $request): int
+    public function send(\Grpc\Request $request): int
     {
         // send non-static method body hook
         return $this->client->send($request);
@@ -126,28 +133,16 @@ class VirtualClient
         return $this->client->recv($streamId, $timeout);
     }
     
-    public function waitForAll(): bool
-    {
-        // waitForAll non-static method body hook
-        return $this->client->waitForAll();
-    }
-    
-    public function close($yield = false): bool
+    public function close(): void
     {
         // close non-static method body hook
-        return $this->client->close($yield);
+        $this->client->close();
     }
     
-    public function closeWait($yield = 3.0): bool
+    public function closeWait(): void
     {
         // closeWait non-static method body hook
-        return $this->client->closeWait($yield);
-    }
-    
-    public function closeAfter(float $time): bool
-    {
-        // closeAfter non-static method body hook
-        return $this->client->closeAfter($time);
+        $this->client->closeWait();
     }
 
 }

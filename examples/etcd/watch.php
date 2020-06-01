@@ -1,17 +1,22 @@
 <?php
+co::set([
+    'log_level' => SWOOLE_LOG_INFO,
+    'trace_flags' => 0,
+]);
 
+use Etcdserverpb\WatchCreateRequest;
 use Etcdserverpb\WatchCreateRequest\FilterType;
+use Etcdserverpb\WatchRequest;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 // The Watcher
 go(function () {
     $watchClient = new Etcdserverpb\WatchClient(GRPC_SERVER_DEFAULT_URI);
-    $watchClient->start();
 
     $watchCall = $watchClient->Watch();
-    $request = new \Etcdserverpb\WatchRequest();
-    $createRequest = new \Etcdserverpb\WatchCreateRequest();
+    $request = new WatchRequest();
+    $createRequest = new WatchCreateRequest();
     $createRequest->setKey('Hello');
     $request->setCreateRequest($createRequest);
 
@@ -19,7 +24,7 @@ go(function () {
     $watchCall->push($request);
     /**@var $reply Etcdserverpb\WatchResponse */
     while (true) {
-        list($reply, $status) = $watchCall->recv();
+        [$reply, $status] = $watchCall->recv();
         if ($status === 0) { // success
             if ($reply->getCreated() || $reply->getCanceled()) {
                 continue;
@@ -54,7 +59,6 @@ go(function () {
 // The Writer Put and Delete
 go(function () {
     $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
-    $kvClient->start();
     go(function () use ($kvClient) {
         $request = new Etcdserverpb\PutRequest();
         $request->setKey('Hello');
@@ -63,7 +67,7 @@ go(function () {
             static $count = 0;
             co::sleep(.5);
             $request->setValue('Swoole#' . (++$count));
-            list($reply, $status) = $kvClient->Put($request);
+            [$reply, $status] = $kvClient->Put($request);
             if ($status !== 0) {
                 echo "Error#{$status}: {$reply}\n";
                 break;
@@ -77,7 +81,7 @@ go(function () {
         $request->setPrevKv(true);
         while (true) {
             co::sleep(1);
-            list($reply, $status) = $kvClient->DeleteRange($request);
+            [$reply, $status] = $kvClient->DeleteRange($request);
             if ($status !== 0) {
                 echo "Error#{$status}: {$reply}\n";
                 break;

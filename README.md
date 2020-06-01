@@ -24,7 +24,7 @@
 ## Requirement
 
 - PHP7及以上
-- [Swoole](https://github.com/swoole/swoole-src): 4.0.4及以上
+- [Swoole](https://github.com/swoole/swoole-src): v4.4.0及以上, StreamingCall支持需要v4.5.3及以上
 - [Protobuf](https://github.com/google/protobuf/tree/master/php)
 - [grpc_php_plugin](https://github.com/grpc/grpc/)
 - 请不要启用grpc的php扩展, 也无需grpc的php库
@@ -63,7 +63,6 @@
 
 ```php
 $greeterClient = new GreeterClient('127.0.0.1:50051');
-$greeterClient->start();
 $request = new HelloRequest();
 $request->setName('Swoole');
 list($reply, $status) = $greeterClient->SayHello($request);
@@ -83,7 +82,6 @@ Etcd的几个基本操作的使用
 
 ```php
 $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379');
-$kvClient->start();
 $request = new Etcdserverpb\PutRequest();
 $request->setPrevKv(true);
 $request->setKey('Hello');
@@ -106,7 +104,6 @@ $kvClient->close();
 // The Watcher
 go(function () {
     $watchClient = new Etcdserverpb\WatchClient('127.0.0.1:2379');
-    $watchClient->start();
 
     $watchCall = $watchClient->Watch();
     $request = new \Etcdserverpb\WatchRequest();
@@ -153,7 +150,6 @@ go(function () {
 // The Writer Put and Delete
 go(function () {
     $kvClient = new Etcdserverpb\KVClient('127.0.0.1:2379');
-    $kvClient->start();
     go(function () use ($kvClient) {
         $request = new Etcdserverpb\PutRequest();
         $request->setKey('Hello');
@@ -195,7 +191,6 @@ go(function () {
 ```php
 go(function () {
     $grpcClient = new Grpc\Client('127.0.0.1:2379');
-    $grpcClient->start();
     // use in different type clients
 
     go(function () use ($grpcClient) {

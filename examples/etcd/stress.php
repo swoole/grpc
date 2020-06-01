@@ -6,7 +6,6 @@ ini_set('memory_limit', '154M');
 co::set(['max_coroutine' => 10002]);
 go(function () {
     $kvClient = new Etcdserverpb\KVClient(GRPC_SERVER_DEFAULT_URI);
-    $kvClient->start();
     $request = new Etcdserverpb\PutRequest();
     $request->setPrevKv(true);
     $request->setValue('Swoole');

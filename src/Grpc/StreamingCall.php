@@ -24,14 +24,12 @@ class StreamingCall extends BaseCall
         if (!$this->streamId) {
             $this->streamId = $this->client->openStream(
                 $this->method,
-                Parser::serializeMessage($message)
+                Parser::serializeMessage($message),
+                '',
+                true
             );
             return $this->streamId > 0;
         } else {
-            trigger_error(
-                E_USER_WARNING, // warning because it may be a wrong retry
-                'You can only send once by a streaming call except connection closed and you retry.'
-            );
             return false;
         }
     }
@@ -39,7 +37,7 @@ class StreamingCall extends BaseCall
     public function push($message): bool
     {
         if (!$this->streamId) {
-            $this->streamId = $this->client->openStream($this->method);
+            $this->streamId = $this->client->openStream($this->method, null, '', true);
         }
         return $this->client->write($this->streamId, Parser::serializeMessage($message), false);
     }
@@ -47,15 +45,15 @@ class StreamingCall extends BaseCall
     public function recv(float $timeout = -1)
     {
         if ($this->streamId <= 0) {
-            $recv = false;
+            $response = false;
         } else {
-            $recv = $this->client->recv($this->streamId, $timeout);
+            $response = $this->client->recv($this->streamId, $timeout);
             if (!$this->client->isStreamExist($this->streamId)) {
                 // stream lost, we need re-push
                 $this->streamId = 0;
             }
         }
-        return Parser::parseToResultArray($recv, $this->deserialize);
+        return Parser::parseToResultArray($response, $this->deserialize);
     }
 
     public function end(): bool

@@ -4,7 +4,6 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 go(function () {
     $grpcClient = new Grpc\Client(GRPC_SERVER_DEFAULT_URI);
-    $grpcClient->start();
     // use in different type clients
 
     go(function () use ($grpcClient) {

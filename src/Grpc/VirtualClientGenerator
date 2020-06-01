@@ -86,7 +86,11 @@ function createSourceOfClass(
         $method_intro .= ')';
 
         // return type
-        $return_type = str_replace($className . '\\', '', $method->getReturnType());
+        $return_type = $method->getReturnType();
+        if (class_exists($return_type)) {
+            $return_type = "\\{$return_type}";
+        }
+        $return_type = str_replace("\\{$className}\\", '', $return_type);
         $return_type = ($return_type ?: '');
 
         // body
@@ -160,11 +164,6 @@ class VirtualClient
     public function getGrpcClient()
     {
         return $this->client;
-    }
-
-    public function start(): bool
-    {
-        return $this->client->isRunning() ? false : $this->client->start();
     }
 
     public function use(?Client $client)

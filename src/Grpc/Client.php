@@ -17,164 +17,131 @@
 
 namespace Grpc;
 
+use InvalidArgumentException;
+use RuntimeException;
+use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
+use Swoole\Coroutine\Http2\Client as Http2Client;
+use Swoole\Http2\Response as Http2Response;
 
 class Client
 {
-    const CLOSE_KEYWORD = '>>>SWOOLE|CLOSE<<<';
-    const WAIT_FOR_ALL = 1;
-    const WAIT_CLOSE = 2;
-    const WAIT_CLOSE_FORCE = 3;
-
-    /**
-     * The queue to get channel object
-     * @var ChannelPool
-     */
-    private static $channelPool;
     /**
      * The stats of all clients
      * @var array
      */
-    private static $numStats = [
+    protected static $numStats = [
         'constructed_num' => 0,
         'destructed_num' => 0,
     ];
 
-    private static $debug = false;
-
-    /**
-     * To record the cid of start coroutine
-     * @var int
-     */
-    private $mainCid;
+    protected static $debug = false;
 
     // ====== send =====
-    /**
-     * If use send yield mode
-     * @var bool
-     */
-    private $sendYield = false;
     /**
      * The channel to proxy send data from all of the coroutine
      * @var Channel
      */
-    private $sendChannel;
+    protected $sendChannel;
     /**
      * The channel to get the current send stream id (as ret val)
      * @var Channel
      */
-    private $sendRetChannel;
+    protected $sendRetChannel;
     /**
      * To record the cid of send loop coroutine
      * @var int
      */
-    private $sendCid = 0;
+    protected $sendCid = 0;
 
     // ===== recv ======
     /**
      * The hashMap of channels [streamId => response]
      * @var Channel[]
      */
-    private $recvChannelMap = [];
+    protected $recvChannelMap = [];
     /**
      * To record the cid of recv loop coroutine
      * @var int
      */
-    private $recvCid = 0;
-
+    protected $recvCid = 0;
     /**
-     * The sign of if this Client is waiting to close
+     * The sign of if this Client is closing
      * @var int
      */
-    private $waitStatus = 0;
+    protected $closing = 0;
     /**
      * @var Channel
      */
-    private $waitYield;
+    protected $closeWaiter;
 
-    private $host;
-    private $port;
-    private $ssl;
-    private $opts;
+    protected $host;
+    protected $port;
+    protected $ssl;
+    protected $opts;
     /**
-     * @var \Swoole\Coroutine\Http2\Client
+     * @var Http2Client
      */
-    private $client;
-    private $timeout;
+    protected $client;
+    protected $timeout;
 
     public static function numStats(): array
     {
-        return self::$numStats;
+        return static::$numStats;
     }
 
     public static function debug(bool $enable = true): void
     {
-        self::$debug = $enable;
+        static::$debug = $enable;
     }
 
     public function __construct(string $hostname, array $opts = [])
     {
-        self::$channelPool = ChannelPool::getInstance();
         // parse url
         $parts = parse_url($hostname);
         if (!$parts || !isset($parts['host']) || !$parts['port']) {
-            throw new \InvalidArgumentException("The hostname {$hostname} is illegal!");
+            throw new InvalidArgumentException("The hostname {$hostname} is illegal!");
         }
         $this->host = $parts['host'];
         $this->port = $parts['port'];
 
         $default_opts = [
             'timeout' => GRPC_DEFAULT_TIMEOUT,
-            'send_yield' => false,
             'ssl' => false,
             'ssl_host_name' => ''
         ];
         $this->opts = $opts + $default_opts;
         $this->timeout = &$this->opts['timeout'];
-        $this->sendYield = &$this->opts['send_yield'];
         $this->ssl = &$this->opts['ssl'];
         $this->ssl = !!$this->ssl || !!$this->opts['ssl_host_name'];
 
-        $this->constructClient();
-    }
-
-    private function constructClient()
-    {
         // create client and init settings
-        $this->client = new \Swoole\Coroutine\Http2\Client($this->host, $this->port, $this->ssl);
+        $this->client = new Http2Client($this->host, $this->port, $this->ssl);
         $this->client->set($this->opts);
-        self::$numStats['constructed_num']++;
+        static::$numStats['constructed_num']++;
+
+        $this->start();
     }
 
-    public function __destruct()
-    {
-        self::$numStats['destructed_num']++;
-    }
-
-    public function __get($name)
-    {
-        return $this->client->$name ?? null;
-    }
-
-    public function start(): bool
+    protected function start()
     {
         if ($this->recvCid !== 0 || $this->sendCid !== 0) {
-            trigger_error('This client has started yet and it\'s running.', E_USER_WARNING);
-            return false;
+            throw new RuntimeException('Client has been started');
         }
-        if ($this->mainCid = \Co::getuid() <= 0) {
-            throw new \BadMethodCallException('You must start it in an alone coroutine.');
+        if (Coroutine::getuid() <= 0) {
+            throw new RuntimeException('Client must be start it in an alone coroutine');
         }
         if (!$this->client->connect()) {
-            return false;
+            throw new RuntimeException('Connect failed, error=' . $this->client->errMsg, $this->client->errCode);
         }
         // receive wait
-        go(function () {
-            $this->recvCid = \Co::getuid();
+        Coroutine::create(function () {
+            $this->recvCid = Coroutine::getuid();
             // start recv loop
             while (true) {
+                /* @var Http2Response $response */
                 $response = $this->client->recv(-1);
-                if (self::$debug) {
+                if (static::$debug) {
                     var_dump($response);
                     if ($response === false && $this->client->errCode !== 0) {
                         var_dump($this->client->errCode);
@@ -183,109 +150,81 @@ class Client
                 }
 
                 if ($response !== false) {
-
-                    // force close
-                    if (
-                        $this->waitStatus === self::WAIT_CLOSE_FORCE // &&
-                        // ($message = $response->headers['grpc-message'] ?? null) &&
-                        // strpos($message, self::CLOSE_KEYWORD) !== false
-                    ) {
-                        // close request has not recv channel pop wait
-                        self::$channelPool->put($this->recvChannelMap[$response->streamId]);
-                        unset($this->recvChannelMap[$response->streamId]);
-                        goto _close;
-                    }
-
                     // normal response
                     if ($the_channel = $this->recvChannelMap[$response->streamId] ?? null) {
                         // we can find the waiting coroutine and return response to it
                         $the_channel->push($response);
 
                         if (!$response->pipeline) {
-                            // revert channel
+                            // unregister channel
                             unset($this->recvChannelMap[$response->streamId]);
-                            self::$channelPool->put($the_channel);
                         }
+                    } // else: receiver not found, discard it
 
-                        // push finished, check if close wait and no coroutine is waiting, if Y, stop recv loop
-                        if ($this->waitStatus === self::WAIT_CLOSE && empty($this->recvChannelMap)) {
-                            break;
-                        }
-                    }// else discard it
-
-                } else {
-
-                    // false response
-                    if (!$this->client->connected) {
-                        _close:
-
-                        // if you want to close it or retry connect failed, stop recv loop
-                        if ($this->waitStatus) {
-                            $need_kill = true;
-                        } else {
-                            if (version_compare(SWOOLE_VERSION, '4.2.3', '<=')) {
-                                // deflater cache bug so we need to new one
-                                $this->constructClient();
-                            }
-                            $need_kill = !$this->client->connect();
-                        }
-
-                        // ↑↓ We must `retry-connect` before we push `false` response
-                        // ↑↓ Then the pop channel coroutine can knows that if this client is available
-
-                        // clear all, we will auto reconnect, but it need user retry again by himself
-                        if (!empty($this->recvChannelMap)) {
-                            foreach ($this->recvChannelMap as $the_channel) {
-                                $the_channel->push(false);
-                                self::$channelPool->put($the_channel);
-                            }
-                            $this->recvChannelMap = [];
-                        }
-
-                        if ($need_kill) {
-                            break;
-                        }
+                    // push finished, check if close wait and no coroutine is waiting, if Y, stop recv loop
+                    if (!$this->closing || !empty($this->recvChannelMap)) {
+                        continue;
                     }
                 }
-            }
 
-            // close success and notify close yield coroutine
-            if ($this->waitYield) {
-                $this->waitYield->push(true);
-                self::$channelPool->put($this->waitYield);
-                $this->waitYield = null;
+                // if you want to close it or retry connect failed, stop recv loop
+                if ($this->closing) {
+                    $need_break = true;
+                } else {
+                    $need_break = !$this->client->connect();
+                }
+
+                // ↑↓ We must `retry-connect` before we push `false` response
+                // ↑↓ Then the pop channel coroutine can knows that if this client is available
+
+                // clear all, we will auto reconnect, but it need user retry again by himself
+                if (!empty($this->recvChannelMap)) {
+                    foreach ($this->recvChannelMap as $the_channel) {
+                        $the_channel->close();
+                    }
+                    $this->recvChannelMap = [];
+                }
+
+                if ($need_break) {
+                    break;
+                }
             }
 
             $this->recvCid = 0;
-            // clear all
-            $this->mainCid = 0;
-            $this->waitStatus = 0;
-            $this->waitYield = null;
+            $this->closed();
         });
 
-        if ($this->sendYield) {
-            // send wait
-            go(function () {
-                $this->sendCid = \Co::getuid();
-                $this->sendChannel = new Channel(0);
-                $this->sendRetChannel = new Channel(0);
-                while (true) {
-                    $sendData = $this->sendChannel->pop(-1);
-                    if ($sendData === 0) {
-                        break;
-                    } elseif ($sendData instanceof Request) {
-                        $ret = $this->client->send($sendData);
-                    } else {
-                        $ret = $this->client->write(...$sendData);
-                    }
-                    $this->sendRetChannel->push($ret);
+        // send wait
+        Coroutine::create(function () {
+            $this->sendCid = Coroutine::getuid();
+            $this->sendChannel = new Channel(0);
+            $this->sendRetChannel = new Channel(0);
+            while (true) {
+                $sendData = $this->sendChannel->pop(-1);
+                if ($sendData === false) {
+                    break;
+                } elseif ($sendData instanceof Request) {
+                    $ret = $this->client->send($sendData);
+                } else {
+                    $ret = $this->client->write(...$sendData);
                 }
+                $this->sendRetChannel->push($ret);
+            }
+            $this->sendRetChannel->close();
 
-                $this->sendCid = 0;
-            });
-        }
+            $this->sendCid = 0;
+            $this->closed();
+        });
+    }
 
-        return true;
+    public function __get(string $name)
+    {
+        return $this->client->$name ?? null;
+    }
+
+    public function __destruct()
+    {
+        static::$numStats['destructed_num']++;
     }
 
     /**
@@ -303,15 +242,15 @@ class Client
 
     public function isRunning(): bool
     {
-        return $this->recvCid > 0 && (!$this->sendYield ?: $this->sendCid > 0);
+        return $this->recvCid > 0 || $this->sendCid > 0;
     }
 
-    public function isStreamExist(int $streamId)
+    public function isStreamExist(int $streamId): bool
     {
         return isset($this->recvChannelMap[$streamId]);
     }
 
-    public function getClient(): \Swoole\Coroutine\Http2\Client
+    public function getClient(): Http2Client
     {
         return $this->client;
     }
@@ -334,32 +273,39 @@ class Client
      * @param string $method
      * @return int
      */
-    public function openStream(string $path, $data = null, string $method = 'POST'): int
+    public function openStream(string $path, $data = '', string $method = '', bool $use_pipeline_read = false): int
     {
         $request = new Request;
-        $request->method = $method;
+        if ($method) {
+            $request->method = $method;
+        } else {
+            if (!$data) {
+                $request->method = 'GET';
+            } else {
+                $request->method = 'POST';
+            }
+        }
         $request->path = $path;
         if ($data) {
             $request->data = $data;
         }
         $request->pipeline = true;
+        if ($use_pipeline_read) {
+            if (SWOOLE_VERSION_ID < 40503) {
+                throw new InvalidArgumentException('Require Swoole version >= 4.5.3');
+            }
+            $request->usePipelineRead = true;
+        }
 
         return $this->send($request);
     }
 
     public function send(Request $request): int
     {
-        if (!$this->isConnected()) {
-            return 0;
-        }
-        if ($this->sendYield) {
-            $this->sendChannel->push($request);
-            $streamId = $this->sendRetChannel->pop();
-        } else {
-            $streamId = $this->client->send($request);
-        }
+        $this->sendChannel->push($request);
+        $streamId = $this->sendRetChannel->pop();
         if ($streamId > 0) {
-            $this->recvChannelMap[$streamId] = self::$channelPool->get();
+            $this->recvChannelMap[$streamId] = new Channel;
         }
 
         return $streamId;
@@ -367,21 +313,11 @@ class Client
 
     public function write(int $streamId, $data, bool $end = false): bool
     {
-        if (!$this->isConnected()) {
-            return false;
-        }
-        if ($this->sendYield) {
-            return $this->sendChannel->push([$streamId, $data, $end]) && $this->sendRetChannel->pop();
-        } else {
-            return $this->client->write($streamId, $data, $end);
-        }
+        return $this->sendChannel->push([$streamId, $data, $end]) && $this->sendRetChannel->pop();
     }
 
     public function recv(int $streamId, float $timeout = null)
     {
-        if (!$this->isConnected() || $streamId <= 0) {
-            return false;
-        }
         $channel = $this->recvChannelMap[$streamId] ?? null;
         if ($channel) {
             $response = $channel->pop($timeout === null ? $this->timeout : $timeout);
@@ -397,58 +333,46 @@ class Client
         return false;
     }
 
-    private function wait(int $type, $yield = true): bool
+    public function close(): void
     {
-        if (!$this->isConnected()) {
-            return false;
+        if ($this->closing) {
+            return;
         }
-        $this->waitStatus = $type;
-        if ($this->waitStatus === self::WAIT_CLOSE) {
-            $ret = true;
-            goto _yield;
+        $this->closing = 2;
+        // close write side first
+        $this->sendChannel->close();
+        $this->client->close();
+    }
+
+    protected function closed(): void
+    {
+        if ($this->closing > 0) {
+            $this->closing--;
         }
-        $closeRequest = new Request;
-        $closeRequest->method = 'GET';
-        $closeRequest->path = self::CLOSE_KEYWORD;
-
-        $ret = ($close_id = $this->send($closeRequest)) && ($this->sendYield ? $this->sendChannel->push(0) : true);
-        if ($ret) {
-            _yield:
-            $yield = $yield === true ? -1 : $yield;
-            if ($yield) {
-                $this->waitYield = self::$channelPool->get();
-                return $this->waitYield->pop($yield);
-            }
+        // close success and notify the close waiter
+        if ($this->closeWaiter) {
+            $closeWaiter = $this->closeWaiter;
+            $this->closeWaiter = null;
+            $closeWaiter->push(true);
         }
-        return $ret;
     }
 
-    public function waitForAll(): bool
+    public function closeWait(): void
     {
-        return $this->wait(self::WAIT_FOR_ALL, true);
+        if ($this->closing) {
+            return;
+        }
+        $this->closing = 2;
+        $this->closeWaiter = new Channel;
+        $n = 0;
+        if ($this->recvCid > 0) {
+            $n++;
+        }
+        if ($this->sendCid > 0) {
+            $n++;
+        }
+        while ($n--) {
+            $this->closeWaiter->pop();
+        }
     }
-
-    /**
-     * Close the client
-     *
-     * @param int $type If CLOSE_FORCE, discard all of the requests which are pending, else waiting for all responses back
-     * @param float|bool if yield(true = -1) or yield timeout num
-     * @return bool
-     */
-    public function close($yield = false): bool
-    {
-        return $this->wait(self::WAIT_CLOSE_FORCE, $yield);
-    }
-
-    public function closeWait($yield = GRPC_DEFAULT_TIMEOUT): bool
-    {
-        return $this->wait(self::WAIT_CLOSE, \Co::getuid() > 0 ? $yield : false) || $this->close();
-    }
-
-    public function closeAfter(float $time): bool
-    {
-        \Co::sleep($time);
-        return $this->close();
-    }
-
 }

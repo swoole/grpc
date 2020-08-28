@@ -8,5 +8,9 @@ namespace Grpc;
 
 class Request extends \Swoole\Http2\Request
 {
-    public $headers = ['content-type' => 'application/grpc'];
+    public $headers = [
+        'content-type' => 'application/grpc',
+        'te' => 'trailers',
+        'user-agent' => 'grpc-swoole',
+    ];
 }

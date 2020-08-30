@@ -20,7 +20,7 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/swoole/etcd-client/issues"
+    "issues": "https://github.com/swoole/grpc/issues"
   },
   "require": {
     "php": ">=7.1",

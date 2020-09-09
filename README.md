@@ -1,8 +1,7 @@
 # Swoole-Grpc-Client
 
-[![Latest Version](https://img.shields.io/github/release/swoole/grpc-client.svg?style=flat-square)](https://github.com/swoole/grpc-client/releases)
-[![Build Status](https://travis-ci.org/swoole/grpc-client.svg?branch=master)](https://travis-ci.org/swoole/grpc-client)
-[![Php Version](https://img.shields.io/badge/php-%3E=7-brightgreen.svg?maxAge=2592000)](https://secure.php.net/)
+[![Latest Version](https://img.shields.io/github/release/swoole/grpc-client.svg)](https://github.com/swoole/grpc-client/releases)
+[![Php Version](https://img.shields.io/badge/php-%3E=7.1-brightgreen.svg?maxAge=2592000)](https://secure.php.net/)
 [![Swoole Version](https://img.shields.io/badge/swoole-%3E=4.0.4-brightgreen.svg?maxAge=2592000)](https://github.com/swoole/swoole-src)
 [![Swoole License](https://img.shields.io/hexpm/l/plug.svg?maxAge=2592000)](https://github.com/swoole/grpc-client/blob/master/LICENSE)
 

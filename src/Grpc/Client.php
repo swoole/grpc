@@ -97,11 +97,18 @@ class Client
 
     public function __construct(string $hostname, array $opts = [])
     {
-        // parse url
-        $parts = parse_url($hostname);
-        if (!$parts || !isset($parts['host']) || !$parts['port']) {
+        if (stripos($hostname, 'unix:/') === 0) {
+            $parts['host'] = $hostname;
+            $parts['port'] = 0;
+        } else {
+            // parse url
+            $parts = parse_url($hostname);
+        }
+
+        if (!$parts || !isset($parts['host']) || !isset($parts['port'])) {
             throw new InvalidArgumentException("The hostname {$hostname} is illegal!");
         }
+
         $this->host = $parts['host'];
         $this->port = $parts['port'];
 

@@ -9,7 +9,9 @@ Coroutine::create(function () {
     $request = new Etcdserverpb\PutRequest();
     $request->setPrevKv(true);
 
-    Coroutine::create(function () use ($kvClient, $request) {
+    $barrier = Coroutine\Barrier::make();
+
+    Coroutine::create(function () use ($kvClient, $request, $barrier) {
         $request->setKey('Hello~');
         $request->setValue('I am Swoole!');
         [$reply, $status] = $kvClient->Put($request);
@@ -21,7 +23,7 @@ Coroutine::create(function () {
         }
     });
 
-    Coroutine::create(function () use ($kvClient, $request) {
+    Coroutine::create(function () use ($kvClient, $request, $barrier) {
         $request->setKey('Hey~');
         $request->setValue('How are u Etcd?');
         [$reply, $status] = $kvClient->Put($request);
@@ -33,6 +35,7 @@ Coroutine::create(function () {
         }
     });
 
-    // wait all of the responses back
-    $kvClient->closeWait();
+    // wait all the responses back
+    $barrier::wait($barrier);
+    $kvClient->close();
 });

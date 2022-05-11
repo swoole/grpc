@@ -12,9 +12,10 @@ Coroutine::create(function () {
     $request->setPrevKv(true);
     $request->setValue('Swoole');
 
+    $barrier = Coroutine\Barrier::make();
     $start = microtime(true);
     for ($i = 10000; $i--;) {
-        Coroutine::create(function () use ($kvClient, $request, $i) {
+        Coroutine::create(function () use ($kvClient, $request, $i, $barrier) {
             $request->setKey("Hello{$i}");
             [$reply, $status] = $kvClient->Put($request);
             assert($reply->getPrevKv()->getKey() === "Hello{$i}");
@@ -25,8 +26,9 @@ Coroutine::create(function () {
         });
     }
 
-    // wait all of the responses back
-    $kvClient->closeWait();
+    // wait all the responses back
+    $barrier::wait($barrier);
+    $kvClient->close();
     echo 'use time: ' . (microtime(true) - $start) . "s\n";
     var_dump($kvClient->stats());
     var_dump(memory_get_usage(true));

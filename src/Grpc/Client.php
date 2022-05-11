@@ -66,14 +66,10 @@ class Client
      */
     protected $recvCid = 0;
     /**
-     * The sign of if this Client is closing
-     * @var int
+     * The sign of if Client->close() was called
+     * @var bool
      */
-    protected $closing = 0;
-    /**
-     * @var Channel
-     */
-    protected $closeWaiter;
+    protected $closed = false;
 
     protected $host;
     protected $port;
@@ -169,27 +165,16 @@ class Client
                     } // else: receiver not found, discard it
 
                     // push finished, check if close wait and no coroutine is waiting, if Y, stop recv loop
-                    if (!$this->closing || !empty($this->recvChannelMap)) {
+                    if (!$this->closed || !empty($this->recvChannelMap)) {
                         continue;
                     }
                 }
 
                 // if you want to close it or retry connect failed, stop recv loop
-                if ($this->closing) {
+                if ($this->closed) {
                     $need_break = true;
                 } else {
                     $need_break = !$this->client->connect();
-                }
-
-                // ↑↓ We must `retry-connect` before we push `false` response
-                // ↑↓ Then the pop channel coroutine can knows that if this client is available
-
-                // clear all, we will auto reconnect, but it need user retry again by himself
-                if (!empty($this->recvChannelMap)) {
-                    foreach ($this->recvChannelMap as $the_channel) {
-                        $the_channel->close();
-                    }
-                    $this->recvChannelMap = [];
                 }
 
                 if ($need_break) {
@@ -198,7 +183,14 @@ class Client
             }
 
             $this->recvCid = 0;
-            $this->closed();
+            $this->client->close();
+            $this->closeWriteSide();
+            while (!empty($this->recvChannelMap)) {
+                foreach ($this->recvChannelMap as $index => $the_channel) {
+                    unset($this->recvChannelMap[$index]);
+                    $the_channel->close();
+                }
+            }
         });
 
         // send wait
@@ -220,7 +212,7 @@ class Client
             $this->sendRetChannel->close();
 
             $this->sendCid = 0;
-            $this->closed();
+            $this->closeReadSide();
         });
     }
 
@@ -340,46 +332,25 @@ class Client
         return false;
     }
 
+    protected function closeReadSide(): void
+    {
+        if ($this->recvCid > 0) {
+            $this->client->close();
+        }
+    }
+
+    protected function closeWriteSide(): void
+    {
+        if ($this->sendCid > 0) {
+            $this->sendChannel->close();
+        }
+    }
+
     public function close(): void
     {
-        if ($this->closing) {
-            return;
-        }
-        $this->closing = 2;
+        $this->closed = true;
         // close write side first
-        $this->sendChannel->close();
-        $this->client->close();
-    }
-
-    protected function closed(): void
-    {
-        if ($this->closing > 0) {
-            $this->closing--;
-        }
-        // close success and notify the close waiter
-        if ($this->closeWaiter) {
-            $closeWaiter = $this->closeWaiter;
-            $this->closeWaiter = null;
-            $closeWaiter->push(true);
-        }
-    }
-
-    public function closeWait(): void
-    {
-        if ($this->closing) {
-            return;
-        }
-        $this->closing = 2;
-        $this->closeWaiter = $closeWaiter = new Channel;
-        $n = 0;
-        if ($this->recvCid > 0) {
-            $n++;
-        }
-        if ($this->sendCid > 0) {
-            $n++;
-        }
-        while ($n--) {
-            $closeWaiter->pop();
-        }
+        $this->closeWriteSide();
+        $this->closeReadSide();
     }
 }

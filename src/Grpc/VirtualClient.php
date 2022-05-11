@@ -138,11 +138,4 @@ class VirtualClient
         // close non-static method body hook
         $this->client->close();
     }
-    
-    public function closeWait(): void
-    {
-        // closeWait non-static method body hook
-        $this->client->closeWait();
-    }
-
 }

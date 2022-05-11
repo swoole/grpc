@@ -348,7 +348,6 @@ class Client
         $this->closing = 2;
         // close write side first
         $this->sendChannel->close();
-        $this->sendRetChannel->close();
         $this->client->close();
     }
 

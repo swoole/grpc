@@ -196,8 +196,8 @@ class Client
         // send wait
         Coroutine::create(function () {
             $this->sendCid = Coroutine::getuid();
-            $this->sendChannel = new Channel(0);
-            $this->sendRetChannel = new Channel(0);
+            $this->sendChannel = new Channel(1);
+            $this->sendRetChannel = new Channel(1);
             while (true) {
                 $sendData = $this->sendChannel->pop(-1);
                 if ($sendData === false) {

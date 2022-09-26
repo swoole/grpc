@@ -20,7 +20,7 @@ function scan_dir(string $dir, callable $filter = null): array
 {
     $files = scandir($dir);
     $files = array_filter($files, function (string $f) {
-        return $f{0} !== '.';
+        return $f[0] !== '.';
     });
     array_walk($files, function (string &$value) use ($dir) {
         $value = rtrim($dir, '/') . '/' . $value;
